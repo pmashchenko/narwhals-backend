@@ -21,11 +21,16 @@
   },
   "dependencies": {
     "@apollo/client": "^3.12.7",
+    "@nestjs/apollo": "^13.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/graphql": "^13.0.2",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.0.5",
     "@nestjs/websockets": "^11.0.5",
+    "apollo-server-express": "^3.13.0",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
     "graphql": "^16.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
