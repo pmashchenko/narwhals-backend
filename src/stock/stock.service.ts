@@ -1,7 +1,8 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import * as dotenv from 'dotenv';
-import NodeCache from 'node-cache';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { Redis } from 'ioredis';
 
 dotenv.config();
 
@@ -9,15 +10,18 @@ dotenv.config();
 export class StockService {
   private readonly apiKey = process.env.FINNHUB_API_KEY;
   private readonly baseUrl = process.env.BASE_URL;
-  private readonly cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
+
+  constructor(@InjectRedis() private readonly redis: Redis) {}
 
   async getStockQuote(symbol: string): Promise<any> {
-    const cachedData = this.cache.get(symbol);
+    const cachedData = await this.redis.get(symbol);
 
     if (cachedData) {
-      return cachedData; // Return cached data
+      console.log(`Cache hit for symbol: ${symbol}`);
+      return JSON.parse(cachedData); // Return cached data
     }
 
+    console.log(`Cache miss for symbol: ${symbol}. Fetching from Finnhub API.`);
     try {
       const { data } = await axios.get(`${this.baseUrl}/quote`, {
         params: {
@@ -26,7 +30,7 @@ export class StockService {
         },
       });
 
-      this.cache.set(symbol, data);
+      await this.redis.set(symbol, JSON.stringify(data), 'EX', 60);
 
       return data;
     } catch (error) {
